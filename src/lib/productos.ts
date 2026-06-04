@@ -1,0 +1,54 @@
+import { createClient } from "@supabase/supabase-js";
+
+// Para el build estático usamos el service_role key (solo build-time, nunca va al HTML)
+// Si no está disponible, cae al anon key (requiere política RLS anon activa)
+const supabase = createClient(
+  import.meta.env.SUPABASE_URL,
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_ANON_KEY
+);
+
+export interface Producto {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  precio_venta: number;
+  imagen_url: string | null;
+  codigo_interno: string;
+  categoria: { id: string; nombre: string; slug: string } | null;
+  marca: { id: string; nombre: string; slug: string } | null;
+}
+
+export async function getProductosActivos(): Promise<Producto[]> {
+  const { data, error } = await supabase
+    .from("productos")
+    .select(`
+      id, nombre, descripcion, precio_venta, imagen_url, codigo_interno,
+      categoria:categorias(id, nombre, slug),
+      marca:marcas(id, nombre, slug)
+    `)
+    .eq("activo", true)
+    .order("nombre");
+
+  if (error) throw new Error(error.message);
+  return (data as Producto[]) ?? [];
+}
+
+export function precioPublico(precioBase: number): string {
+  return (precioBase * 1.15).toFixed(2);
+}
+
+export function getCategorias(productos: Producto[]) {
+  const map = new Map<string, { id: string; nombre: string; slug: string }>();
+  for (const p of productos) {
+    if (p.categoria) map.set(p.categoria.id, p.categoria);
+  }
+  return Array.from(map.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+}
+
+export function getMarcas(productos: Producto[]) {
+  const map = new Map<string, { id: string; nombre: string; slug: string }>();
+  for (const p of productos) {
+    if (p.marca) map.set(p.marca.id, p.marca);
+  }
+  return Array.from(map.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+}

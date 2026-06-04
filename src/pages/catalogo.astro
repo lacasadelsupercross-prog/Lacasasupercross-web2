@@ -1,0 +1,64 @@
+---
+import Base from "../layouts/Base.astro";
+import ProductoCard from "../components/ProductoCard.astro";
+import FiltrosCatalogo from "../components/FiltrosCatalogo.astro";
+import { getProductosActivos, getCategorias, getMarcas } from "../lib/productos";
+
+const productos = await getProductosActivos();
+const categorias = getCategorias(productos);
+const marcas = getMarcas(productos);
+---
+
+<Base
+  title="Catálogo de repuestos | La Casa del Súper Cross"
+  description={`${productos.length} repuestos para motos disponibles en Riobamba. Filtra por categoría o marca y consulta por WhatsApp.`}
+>
+  <div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
+
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Catálogo de repuestos</h1>
+      <p class="text-gray-500 text-sm mt-1">{productos.length} productos disponibles</p>
+    </div>
+
+    <!-- Filtros -->
+    <FiltrosCatalogo categorias={categorias} marcas={marcas} />
+
+    <!-- Grid -->
+    {productos.length === 0 ? (
+      <div class="text-center py-20 text-gray-400">
+        <p class="text-5xl mb-4">🔧</p>
+        <p class="text-lg">Sin productos disponibles por el momento.</p>
+      </div>
+    ) : (
+      <div id="grid-productos" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {productos.map(p => (
+          <div
+            data-producto
+            data-nombre={p.nombre}
+            data-categoria={p.categoria?.id ?? ""}
+            data-marca={p.marca?.id ?? ""}
+          >
+            <ProductoCard producto={p} />
+          </div>
+        ))}
+      </div>
+    )}
+
+  </div>
+</Base>
+
+<script>
+  // Leer parámetros de URL y preseleccionar filtros
+  const params = new URLSearchParams(window.location.search);
+  const catParam = params.get("categoria");
+  const marcaParam = params.get("marca");
+
+  if (catParam) {
+    const sel = document.getElementById("filtro-categoria") as HTMLSelectElement;
+    if (sel) { sel.value = catParam; sel.dispatchEvent(new Event("change")); }
+  }
+  if (marcaParam) {
+    const sel = document.getElementById("filtro-marca") as HTMLSelectElement;
+    if (sel) { sel.value = marcaParam; sel.dispatchEvent(new Event("change")); }
+  }
+</script>

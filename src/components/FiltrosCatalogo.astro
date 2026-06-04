@@ -1,0 +1,81 @@
+---
+interface Props {
+  categorias: { id: string; nombre: string; slug: string }[];
+  marcas: { id: string; nombre: string; slug: string }[];
+}
+const { categorias, marcas } = Astro.props;
+---
+
+<div id="filtros" class="flex flex-wrap gap-3 items-center">
+  <!-- Búsqueda -->
+  <div class="relative flex-1 min-w-[180px]">
+    <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    </svg>
+    <input
+      id="filtro-busqueda"
+      type="search"
+      placeholder="Buscar producto..."
+      class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+    />
+  </div>
+
+  <!-- Categoría -->
+  <select
+    id="filtro-categoria"
+    class="py-2 px-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+  >
+    <option value="">Todas las categorías</option>
+    {categorias.map(c => <option value={c.id}>{c.nombre}</option>)}
+  </select>
+
+  <!-- Marca -->
+  <select
+    id="filtro-marca"
+    class="py-2 px-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+  >
+    <option value="">Todas las marcas</option>
+    {marcas.map(m => <option value={m.id}>{m.nombre}</option>)}
+  </select>
+
+  <span id="filtro-count" class="text-sm text-gray-500 ml-auto"></span>
+</div>
+
+<script>
+  const inputBusqueda = document.getElementById("filtro-busqueda") as HTMLInputElement;
+  const selectCategoria = document.getElementById("filtro-categoria") as HTMLSelectElement;
+  const selectMarca = document.getElementById("filtro-marca") as HTMLSelectElement;
+  const countEl = document.getElementById("filtro-count")!;
+
+  function aplicarFiltros() {
+    const q = inputBusqueda.value.toLowerCase().trim();
+    const catId = selectCategoria.value;
+    const marcaId = selectMarca.value;
+
+    const tarjetas = document.querySelectorAll<HTMLElement>("[data-producto]");
+    let visibles = 0;
+
+    tarjetas.forEach(el => {
+      const nombre = (el.dataset.nombre ?? "").toLowerCase();
+      const categoria = el.dataset.categoria ?? "";
+      const marca = el.dataset.marca ?? "";
+
+      const pasaBusqueda = !q || nombre.includes(q);
+      const pasaCategoria = !catId || categoria === catId;
+      const pasaMarca = !marcaId || marca === marcaId;
+
+      const visible = pasaBusqueda && pasaCategoria && pasaMarca;
+      el.style.display = visible ? "" : "none";
+      if (visible) visibles++;
+    });
+
+    countEl.textContent = `${visibles} producto${visibles !== 1 ? "s" : ""}`;
+  }
+
+  inputBusqueda.addEventListener("input", aplicarFiltros);
+  selectCategoria.addEventListener("change", aplicarFiltros);
+  selectMarca.addEventListener("change", aplicarFiltros);
+
+  // Inicializar conteo
+  aplicarFiltros();
+</script>
