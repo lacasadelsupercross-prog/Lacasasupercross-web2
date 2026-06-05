@@ -1,12 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 
-function getSupabase() {
-  const url = process.env.SUPABASE_URL ?? "";
-  const key =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    process.env.SUPABASE_ANON_KEY ?? "";
-  return createClient(url, key);
-}
+// URL y anon key son públicos por diseño de Supabase (igual que cualquier app cliente)
+// El anon key solo puede leer productos activos (política RLS)
+const SUPABASE_URL = "https://uufodpagmahijwzsamhv.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1Zm9kcGFnbWFoaWp3enNhbWh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NjU2ODksImV4cCI6MjA5NTM0MTY4OX0.2c0f908edrtW-AiomJnwYI-p8CBS5dvNJbiH9ZPpAEE";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export interface Producto {
   id: string;
@@ -20,7 +20,6 @@ export interface Producto {
 }
 
 export async function getProductosActivos(): Promise<Producto[]> {
-  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("productos")
     .select(`
