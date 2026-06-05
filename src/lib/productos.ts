@@ -1,17 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Lee de import.meta.env (local/dev) o process.env (Cloudflare Pages build)
-const SUPABASE_URL =
-  import.meta.env.SUPABASE_URL ??
-  (typeof process !== "undefined" ? process.env.SUPABASE_URL : undefined) ?? "";
-
-const SUPABASE_KEY =
-  import.meta.env.SUPABASE_SERVICE_ROLE_KEY ??
-  (typeof process !== "undefined" ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined) ??
-  import.meta.env.SUPABASE_ANON_KEY ??
-  (typeof process !== "undefined" ? process.env.SUPABASE_ANON_KEY : undefined) ?? "";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+function getSupabase() {
+  const url = process.env.SUPABASE_URL ?? "";
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_ANON_KEY ?? "";
+  return createClient(url, key);
+}
 
 export interface Producto {
   id: string;
@@ -25,6 +20,7 @@ export interface Producto {
 }
 
 export async function getProductosActivos(): Promise<Producto[]> {
+  const supabase = getSupabase();
   const { data, error } = await supabase
     .from("productos")
     .select(`
