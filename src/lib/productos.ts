@@ -1,11 +1,17 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Para el build estático usamos el service_role key (solo build-time, nunca va al HTML)
-// Si no está disponible, cae al anon key (requiere política RLS anon activa)
-const supabase = createClient(
-  import.meta.env.SUPABASE_URL,
-  import.meta.env.SUPABASE_SERVICE_ROLE_KEY ?? import.meta.env.SUPABASE_ANON_KEY
-);
+// Lee de import.meta.env (local/dev) o process.env (Cloudflare Pages build)
+const SUPABASE_URL =
+  import.meta.env.SUPABASE_URL ??
+  (typeof process !== "undefined" ? process.env.SUPABASE_URL : undefined) ?? "";
+
+const SUPABASE_KEY =
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY ??
+  (typeof process !== "undefined" ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined) ??
+  import.meta.env.SUPABASE_ANON_KEY ??
+  (typeof process !== "undefined" ? process.env.SUPABASE_ANON_KEY : undefined) ?? "";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export interface Producto {
   id: string;
