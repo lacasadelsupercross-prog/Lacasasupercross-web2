@@ -1,6 +1,9 @@
 name = "lacasasupercross"
 compatibility_date = "2024-09-23"
 
+[assets]
+directory = "./dist"
+
 [[kv_namespaces]]
 binding = "SESSION"
 id = "269ea6dbc0f1433eb74d5e69e2278806"
