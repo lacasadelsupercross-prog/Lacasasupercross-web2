@@ -28,12 +28,10 @@ const ICONOS: Record<string, string> = {
 >
 
   <!-- Hero -->
-  <section
-    class="relative text-white py-20 px-4"
-    style="background-image: url('/banner.jpeg'); background-size: cover; background-position: center top;"
-  >
-    <div class="absolute inset-0 bg-black/60"></div>
-    <div class="relative max-w-4xl mx-auto text-center space-y-6">
+  <section class="relative text-white">
+    <img src="/banner.jpeg" alt="" class="w-full h-auto block" />
+    <div class="absolute inset-0 bg-black/55 flex items-center justify-center px-4">
+      <div class="max-w-4xl w-full text-center space-y-6 py-8">
       <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight drop-shadow-lg">
         Repuestos para motos<br/>
         <span class="text-orange-400">desde Riobamba</span>
@@ -57,10 +55,12 @@ const ICONOS: Record<string, string> = {
           Consultar por WhatsApp
         </a>
       </div>
+      </div>
     </div>
   </section>
 
   <!-- Categorías -->
+
 
   {categorias.length > 0 && (
     <section class="max-w-6xl mx-auto px-4 py-12">
