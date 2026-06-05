@@ -1,4 +1,4 @@
-# Astro Starter Kit: Minimal
+# La Casa del Súper Cross — Tienda Web
 
 ```sh
 npm create astro@latest -- --template minimal
