@@ -13,24 +13,33 @@ const marcas = getMarcas(productos);
   title="Catálogo de repuestos | La Casa del Súper Cross"
   description={`${productos.length} repuestos para motos disponibles en Riobamba. Filtra por categoría o marca y consulta por WhatsApp.`}
 >
-  <div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
 
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">Catálogo de repuestos</h1>
+  <!-- Header de página -->
+  <div class="bg-white border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <nav class="text-sm text-gray-400 mb-3 flex items-center gap-1.5">
+        <a href="/" class="hover:text-orange-500 transition-colors">Inicio</a>
+        <span>›</span>
+        <span class="text-gray-700 font-medium">Catálogo</span>
+      </nav>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900">Catálogo de repuestos</h1>
       <p class="text-gray-500 text-sm mt-1">{productos.length} productos disponibles</p>
     </div>
+  </div>
 
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
     <!-- Filtros -->
     <FiltrosCatalogo categorias={categorias} marcas={marcas} />
 
     <!-- Grid -->
     {productos.length === 0 ? (
-      <div class="text-center py-20 text-gray-400">
-        <p class="text-5xl mb-4">🔧</p>
-        <p class="text-lg">Sin productos disponibles por el momento.</p>
+      <div class="text-center py-24 text-gray-400">
+        <div class="text-6xl mb-4">🔧</div>
+        <p class="text-lg font-semibold text-gray-500">Sin productos disponibles por el momento</p>
+        <p class="text-sm mt-1">Contáctanos por WhatsApp para consultar disponibilidad</p>
       </div>
     ) : (
-      <div id="grid-productos" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div id="grid-productos" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {productos.map(p => (
           <div
             data-producto
@@ -43,12 +52,11 @@ const marcas = getMarcas(productos);
         ))}
       </div>
     )}
-
   </div>
+
 </Base>
 
 <script>
-  // Leer parámetros de URL y preseleccionar filtros
   const params = new URLSearchParams(window.location.search);
   const catParam = params.get("categoria");
   const marcaParam = params.get("marca");

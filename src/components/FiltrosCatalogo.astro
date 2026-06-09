@@ -6,39 +6,41 @@ interface Props {
 const { categorias, marcas } = Astro.props;
 ---
 
-<div id="filtros" class="flex flex-wrap gap-3 items-center">
-  <!-- Búsqueda -->
-  <div class="relative flex-1 min-w-[180px]">
-    <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-    </svg>
-    <input
-      id="filtro-busqueda"
-      type="search"
-      placeholder="Buscar producto..."
-      class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-    />
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+  <div class="flex flex-wrap gap-3 items-center">
+    <!-- Búsqueda -->
+    <div class="relative flex-1 min-w-[200px]">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+      </svg>
+      <input
+        id="filtro-busqueda"
+        type="search"
+        placeholder="Buscar por nombre..."
+        class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent bg-gray-50 placeholder-gray-400"
+      />
+    </div>
+
+    <!-- Categoría -->
+    <select
+      id="filtro-categoria"
+      class="py-2.5 px-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent bg-gray-50 text-gray-700 min-w-[160px]"
+    >
+      <option value="">Todas las categorías</option>
+      {categorias.map(c => <option value={c.id}>{c.nombre}</option>)}
+    </select>
+
+    <!-- Marca -->
+    <select
+      id="filtro-marca"
+      class="py-2.5 px-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent bg-gray-50 text-gray-700 min-w-[140px]"
+    >
+      <option value="">Todas las marcas</option>
+      {marcas.map(m => <option value={m.id}>{m.nombre}</option>)}
+    </select>
+
+    <span id="filtro-count" class="text-sm text-gray-500 ml-auto font-medium"></span>
   </div>
-
-  <!-- Categoría -->
-  <select
-    id="filtro-categoria"
-    class="py-2 px-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
-  >
-    <option value="">Todas las categorías</option>
-    {categorias.map(c => <option value={c.id}>{c.nombre}</option>)}
-  </select>
-
-  <!-- Marca -->
-  <select
-    id="filtro-marca"
-    class="py-2 px-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
-  >
-    <option value="">Todas las marcas</option>
-    {marcas.map(m => <option value={m.id}>{m.nombre}</option>)}
-  </select>
-
-  <span id="filtro-count" class="text-sm text-gray-500 ml-auto"></span>
 </div>
 
 <script>
@@ -76,6 +78,5 @@ const { categorias, marcas } = Astro.props;
   selectCategoria.addEventListener("change", aplicarFiltros);
   selectMarca.addEventListener("change", aplicarFiltros);
 
-  // Inicializar conteo
   aplicarFiltros();
 </script>

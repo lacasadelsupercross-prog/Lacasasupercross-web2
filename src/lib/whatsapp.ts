@@ -8,3 +8,8 @@ export function urlConsulta(nombre: string, codigo: string): string {
 export function urlGeneral(): string {
   return `https://wa.me/${NUMERO}?text=${encodeURIComponent("Hola, quisiera información sobre repuestos de motos.")}`;
 }
+
+export function urlServicio(nombre: string): string {
+  const msg = `Hola, quisiera agendar el servicio: *${nombre}*. ¿Cuál es su disponibilidad?`;
+  return `https://wa.me/${NUMERO}?text=${encodeURIComponent(msg)}`;
+}

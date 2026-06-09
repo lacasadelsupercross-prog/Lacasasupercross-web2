@@ -1,7 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 
-// URL y anon key son públicos por diseño de Supabase (igual que cualquier app cliente)
-// El anon key solo puede leer productos activos (política RLS)
 const SUPABASE_URL = "https://uufodpagmahijwzsamhv.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1Zm9kcGFnbWFoaWp3enNhbWh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NjU2ODksImV4cCI6MjA5NTM0MTY4OX0.2c0f908edrtW-AiomJnwYI-p8CBS5dvNJbiH9ZPpAEE";
@@ -15,8 +13,19 @@ export interface Producto {
   precio_venta: number;
   imagen_url: string | null;
   codigo_interno: string;
+  promo_activa: boolean;
+  promo_fecha_inicio: string | null;
+  promo_fecha_fin: string | null;
+  promo_descuento_monto: number | null;
   categoria: { id: string; nombre: string; slug: string } | null;
   marca: { id: string; nombre: string; slug: string } | null;
+}
+
+export interface Servicio {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  precio: number;
 }
 
 export async function getProductosActivos(): Promise<Producto[]> {
@@ -24,6 +33,7 @@ export async function getProductosActivos(): Promise<Producto[]> {
     .from("productos")
     .select(`
       id, nombre, descripcion, precio_venta, imagen_url, codigo_interno,
+      promo_activa, promo_fecha_inicio, promo_fecha_fin, promo_descuento_monto,
       categoria:categorias(id, nombre, slug),
       marca:marcas(id, nombre, slug)
     `)
@@ -35,8 +45,53 @@ export async function getProductosActivos(): Promise<Producto[]> {
   return (data as Producto[]) ?? [];
 }
 
+export async function getServicios(): Promise<Servicio[]> {
+  const { data, error } = await supabase
+    .from("servicios")
+    .select("id, nombre, descripcion, precio")
+    .eq("activo", true)
+    .order("nombre");
+
+  if (error) throw new Error(error.message);
+  return (data as Servicio[]) ?? [];
+}
+
 export function precioPublico(precioBase: number): string {
   return (precioBase * 1.15).toFixed(2);
+}
+
+/** Retorna la promo si está activa HOY según fechas */
+export function getPromoActiva(producto: Producto): {
+  precioOriginal: string;
+  precioPromo: string;
+  ahorro: string;
+  porcentaje: string;
+} | null {
+  if (!producto.promo_activa || !producto.promo_descuento_monto) return null;
+
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  if (producto.promo_fecha_inicio) {
+    const inicio = new Date(producto.promo_fecha_inicio + "T00:00:00");
+    if (hoy < inicio) return null;
+  }
+  if (producto.promo_fecha_fin) {
+    const fin = new Date(producto.promo_fecha_fin + "T23:59:59");
+    if (hoy > fin) return null;
+  }
+
+  const precioOriginal = parseFloat(precioPublico(producto.precio_venta));
+  const descuento = producto.promo_descuento_monto;
+  const precioPromo = Math.max(0, precioOriginal - descuento);
+  const porcentaje = ((descuento / precioOriginal) * 100).toFixed(0);
+
+  return {
+    precioOriginal: precioOriginal.toFixed(2),
+    precioPromo: precioPromo.toFixed(2),
+    ahorro: descuento.toFixed(2),
+    porcentaje,
+  };
 }
 
 export function getCategorias(productos: Producto[]) {
