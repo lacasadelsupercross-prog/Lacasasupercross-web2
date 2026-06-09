@@ -28,6 +28,7 @@ export async function getProductosActivos(): Promise<Producto[]> {
       marca:marcas(id, nombre, slug)
     `)
     .eq("activo", true)
+    .eq("disponible_en_tienda", true)
     .order("nombre");
 
   if (error) throw new Error(error.message);
