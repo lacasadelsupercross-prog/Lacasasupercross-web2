@@ -14,28 +14,26 @@ const marcas = getMarcas(productos);
   description={`${productos.length} repuestos para motos disponibles en Riobamba. Filtra por categoría o marca y consulta por WhatsApp.`}
 >
 
-  <!-- Header de página -->
-  <div class="bg-white border-b border-gray-100">
+  <!-- Header -->
+  <div class="bg-[#111] border-b border-white/10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      <nav class="text-sm text-gray-400 mb-3 flex items-center gap-1.5">
-        <a href="/" class="hover:text-orange-500 transition-colors">Inicio</a>
+      <nav class="text-xs text-white/30 mb-2 flex items-center gap-1.5">
+        <a href="/" class="hover:text-[#E85A0C] transition-colors">Inicio</a>
         <span>›</span>
-        <span class="text-gray-700 font-medium">Catálogo</span>
+        <span class="text-white/60">Catálogo</span>
       </nav>
-      <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900">Catálogo de repuestos</h1>
-      <p class="text-gray-500 text-sm mt-1">{productos.length} productos disponibles</p>
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Catálogo de repuestos</h1>
+      <p class="text-white/40 text-sm mt-1">{productos.length} productos disponibles</p>
     </div>
   </div>
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-    <!-- Filtros -->
     <FiltrosCatalogo categorias={categorias} marcas={marcas} />
 
-    <!-- Grid -->
     {productos.length === 0 ? (
-      <div class="text-center py-24 text-gray-400">
-        <div class="text-6xl mb-4">🔧</div>
-        <p class="text-lg font-semibold text-gray-500">Sin productos disponibles por el momento</p>
+      <div class="text-center py-24 text-black/30">
+        <div class="text-5xl mb-4">🔧</div>
+        <p class="font-semibold text-black/50">Sin productos disponibles por el momento</p>
         <p class="text-sm mt-1">Contáctanos por WhatsApp para consultar disponibilidad</p>
       </div>
     ) : (
@@ -60,7 +58,6 @@ const marcas = getMarcas(productos);
   const params = new URLSearchParams(window.location.search);
   const catParam = params.get("categoria");
   const marcaParam = params.get("marca");
-
   if (catParam) {
     const sel = document.getElementById("filtro-categoria") as HTMLSelectElement;
     if (sel) { sel.value = catParam; sel.dispatchEvent(new Event("change")); }

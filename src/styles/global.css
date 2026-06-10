@@ -1,1 +1,22 @@
 @import "tailwindcss";
+
+@theme {
+  --color-brand: #E85A0C;
+  --color-brand-hover: #C94E0A;
+  --color-dark: #111111;
+  --color-dark-2: #1a1a1a;
+  --color-cream: #F5F0E8;
+  --color-cream-dark: #EDE7DB;
+  --color-border: rgba(0,0,0,0.12);
+  --border-radius-card: 12px;
+  --border-radius-base: 8px;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
