@@ -56,8 +56,8 @@ export async function getServicios(): Promise<Servicio[]> {
   return (data as Servicio[]) ?? [];
 }
 
-export function precioPublico(precioBase: number): string {
-  return (precioBase * 1.15).toFixed(2);
+export function precioPublico(precio: number): string {
+  return precio.toFixed(2);
 }
 
 /** Retorna la promo si está activa HOY según fechas */
