@@ -250,6 +250,12 @@ import Base from "../layouts/Base.astro";
     })));
   }
 
+  // Vaciar carrito al enviar por WhatsApp
+  document.getElementById("btn-comprar-wa")!.addEventListener("click", () => {
+    vaciarCarrito();
+    render();
+  });
+
   document.addEventListener("click", (e) => {
     const target = e.target as HTMLElement;
 
@@ -360,7 +366,9 @@ import Base from "../layouts/Base.astro";
         throw new Error(err?.message ?? `Error ${resItems.status} al guardar los productos`);
       }
 
-      // 3. Mostrar confirmación
+      // 3. Vaciar carrito y mostrar confirmación
+      vaciarCarrito();
+      render();
       form.classList.add("hidden");
       confirmacion.classList.remove("hidden");
 
