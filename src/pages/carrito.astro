@@ -174,11 +174,14 @@ import Base from "../layouts/Base.astro";
 <script>
   import { getCarrito, actualizarCantidad, vaciarCarrito } from "../lib/carrito";
   import { urlCarrito } from "../lib/whatsapp";
-  import { createClient } from "@supabase/supabase-js";
 
   const SUPABASE_URL = "https://kpqrcufbnicyubzilkgq.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwcXJjdWZibmljeXViemlsa2dxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MjEzODgsImV4cCI6MjA5NjE5NzM4OH0.dy5dX9Bv3bPacaAwTkF73ACL1PnNQn23xUV3SMszL2c";
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const SBHEADERS = {
+    "Content-Type": "application/json",
+    "apikey": SUPABASE_ANON_KEY,
+    "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+  };
 
   function render() {
     const items = getCarrito();
@@ -324,13 +327,17 @@ import Base from "../layouts/Base.astro";
 
     try {
       // 1. Crear proforma
-      const { data: proforma, error: errPf } = await (supabase as any)
-        .from("proformas")
-        .insert({ nombre_cliente: nombre, telefono_cliente: telefono, email_cliente: email })
-        .select("id")
-        .single();
-
-      if (errPf || !proforma) throw new Error(errPf?.message ?? "Error al crear la proforma");
+      const resPf = await fetch(`${SUPABASE_URL}/rest/v1/proformas?select=id`, {
+        method: "POST",
+        headers: { ...SBHEADERS, "Prefer": "return=representation" },
+        body: JSON.stringify({ nombre_cliente: nombre, telefono_cliente: telefono, email_cliente: email }),
+      });
+      if (!resPf.ok) {
+        const err = await resPf.json().catch(() => ({}));
+        throw new Error(err?.message ?? `Error ${resPf.status} al crear la proforma`);
+      }
+      const [proforma] = await resPf.json() as { id: string }[];
+      if (!proforma?.id) throw new Error("No se pudo obtener el ID de la proforma");
 
       // 2. Insertar ítems
       const itemsInsert = items.map(item => ({
@@ -342,11 +349,15 @@ import Base from "../layouts/Base.astro";
         cantidad_proforma:   item.cantidad,
       }));
 
-      const { error: errItems } = await (supabase as any)
-        .from("proforma_items")
-        .insert(itemsInsert);
-
-      if (errItems) throw new Error(errItems.message);
+      const resItems = await fetch(`${SUPABASE_URL}/rest/v1/proforma_items`, {
+        method: "POST",
+        headers: SBHEADERS,
+        body: JSON.stringify(itemsInsert),
+      });
+      if (!resItems.ok) {
+        const err = await resItems.json().catch(() => ({}));
+        throw new Error(err?.message ?? `Error ${resItems.status} al guardar los productos`);
+      }
 
       // 3. Mostrar confirmación
       form.classList.add("hidden");
