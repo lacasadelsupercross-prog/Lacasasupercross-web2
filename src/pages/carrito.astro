@@ -326,22 +326,23 @@ import Base from "../layouts/Base.astro";
     const items = getCarrito();
 
     try {
-      // 1. Crear proforma
-      const resPf = await fetch(`${SUPABASE_URL}/rest/v1/proformas?select=id`, {
+      // Generar UUID en el cliente para no necesitar leer el ID de vuelta
+      const proformaId = crypto.randomUUID();
+
+      // 1. Crear proforma (INSERT simple, sin RETURNING)
+      const resPf = await fetch(`${SUPABASE_URL}/rest/v1/proformas`, {
         method: "POST",
-        headers: { ...SBHEADERS, "Prefer": "return=representation" },
-        body: JSON.stringify({ nombre_cliente: nombre, telefono_cliente: telefono, email_cliente: email }),
+        headers: SBHEADERS,
+        body: JSON.stringify({ id: proformaId, nombre_cliente: nombre, telefono_cliente: telefono, email_cliente: email }),
       });
       if (!resPf.ok) {
         const err = await resPf.json().catch(() => ({}));
         throw new Error(err?.message ?? `Error ${resPf.status} al crear la proforma`);
       }
-      const [proforma] = await resPf.json() as { id: string }[];
-      if (!proforma?.id) throw new Error("No se pudo obtener el ID de la proforma");
 
       // 2. Insertar ítems
       const itemsInsert = items.map(item => ({
-        proforma_id:         proforma.id,
+        proforma_id:         proformaId,
         producto_id:         item.id,
         nombre_producto:     item.nombre,
         precio_unitario:     parseFloat(item.precio),
