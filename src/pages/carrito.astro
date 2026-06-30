@@ -216,7 +216,14 @@ import Base from "../layouts/Base.astro";
             class="btn-menos w-8 h-8 flex items-center justify-center rounded-full border border-black/15 hover:border-[#E85A0C] hover:text-[#E85A0C] transition-colors font-bold text-base"
             data-id="${item.id}"
           >−</button>
-          <span class="w-7 text-center text-sm font-bold">${item.cantidad}</span>
+          <input
+            type="number"
+            min="1"
+            step="1"
+            value="${item.cantidad}"
+            data-id="${item.id}"
+            class="qty-input w-12 text-center text-sm font-bold border border-black/15 rounded-[6px] py-1 focus:outline-none focus:border-[#E85A0C] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          />
           <button
             class="btn-mas w-8 h-8 flex items-center justify-center rounded-full border border-black/15 hover:border-[#E85A0C] hover:text-[#E85A0C] transition-colors font-bold text-base"
             data-id="${item.id}"
@@ -283,6 +290,23 @@ import Base from "../layouts/Base.astro";
         render();
       }
     }
+  });
+
+  // Input directo de cantidad con teclado
+  document.addEventListener("change", (e) => {
+    const input = (e.target as HTMLElement).closest(".qty-input") as HTMLInputElement | null;
+    if (!input) return;
+    const id = input.dataset.id!;
+    const nueva = Math.floor(Math.max(1, parseInt(input.value) || 1));
+    actualizarCantidad(id, nueva);
+    render();
+  });
+
+  // Enter en el input también confirma
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+    const input = (e.target as HTMLElement).closest(".qty-input") as HTMLInputElement | null;
+    if (input) input.blur();
   });
 
   // ── Modal Proforma ───────────────────────────────────────────────────────────
