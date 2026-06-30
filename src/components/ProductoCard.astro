@@ -72,6 +72,7 @@ const precioEfectivo = promo ? promo.precioPromo : precioPublico(producto.precio
     <button
       class="btn-agregar-carrito mt-2 flex items-center justify-center gap-2 w-full bg-[#111] hover:bg-[#E85A0C] text-white text-xs font-semibold py-2.5 px-3 rounded-[8px] transition-colors duration-200"
       data-id={producto.codigo_interno}
+      data-uuid={producto.id}
       data-nombre={producto.nombre}
       data-codigo={producto.codigo_interno}
       data-precio={precioEfectivo}
@@ -94,6 +95,7 @@ const precioEfectivo = promo ? promo.precioPromo : precioPublico(producto.precio
 
     agregarAlCarrito({
       id: btn.dataset.id!,
+      uuid: btn.dataset.uuid ?? "",
       nombre: btn.dataset.nombre!,
       codigo: btn.dataset.codigo!,
       precio: btn.dataset.precio!,

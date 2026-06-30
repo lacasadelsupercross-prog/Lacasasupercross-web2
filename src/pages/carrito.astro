@@ -343,7 +343,7 @@ import Base from "../layouts/Base.astro";
       // 2. Insertar ítems
       const itemsInsert = items.map(item => ({
         proforma_id:         proformaId,
-        producto_id:         item.id,
+        producto_id:         item.uuid || null,
         nombre_producto:     item.nombre,
         precio_unitario:     parseFloat(item.precio),
         cantidad_solicitada: item.cantidad,

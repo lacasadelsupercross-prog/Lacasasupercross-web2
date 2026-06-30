@@ -1,5 +1,6 @@
 export interface CartItem {
   id: string;
+  uuid: string;
   nombre: string;
   codigo: string;
   precio: string;
