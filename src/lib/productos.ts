@@ -6,6 +6,8 @@ const SUPABASE_ANON_KEY =
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const SUCURSAL_ID = "11111111-1111-1111-1111-111111111102";
+
 export interface Producto {
   id: string;
   nombre: string;
@@ -32,17 +34,35 @@ export async function getProductosActivos(): Promise<Producto[]> {
   const { data, error } = await supabase
     .from("productos")
     .select(`
-      id, nombre, descripcion, precio_venta, imagen_url, codigo_interno,
+      id, nombre, descripcion, precio_venta, imagen_url, codigo_interno, disponible_en_tienda,
       promo_activa, promo_fecha_inicio, promo_fecha_fin, promo_descuento_monto,
       categoria:categorias(id, nombre, slug),
-      marca:marcas(id, nombre, slug)
+      marca:marcas(id, nombre, slug),
+      inventario_local(cantidad, precio_venta, local_id)
     `)
     .eq("activo", true)
-    .eq("disponible_en_tienda", true)
     .order("nombre");
 
   if (error) throw new Error(error.message);
-  return (data as Producto[]) ?? [];
+
+  type ProductoConInventario = Producto & {
+    disponible_en_tienda: boolean;
+    inventario_local: { cantidad: number; precio_venta: number | null; local_id: string }[] | null;
+  };
+
+  return ((data as ProductoConInventario[]) ?? [])
+    .map((p) => {
+      const inventario = p.inventario_local ?? [];
+      const stockTotal = inventario.reduce((sum, i) => sum + i.cantidad, 0);
+      const precioSucursal = inventario.find((i) => i.local_id === SUCURSAL_ID)?.precio_venta;
+      return {
+        ...p,
+        precio_venta: precioSucursal ?? p.precio_venta,
+        _visible: p.disponible_en_tienda && stockTotal > 0,
+      };
+    })
+    .filter((p) => p._visible)
+    .map(({ _visible, ...p }) => p as Producto);
 }
 
 export async function getServicios(): Promise<Servicio[]> {
