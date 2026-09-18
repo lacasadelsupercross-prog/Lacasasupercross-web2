@@ -6,6 +6,7 @@ const SUPABASE_ANON_KEY =
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const MATRIZ_ID   = "11111111-1111-1111-1111-111111111101";
 const SUCURSAL_ID = "11111111-1111-1111-1111-111111111102";
 
 export interface Producto {
@@ -34,7 +35,7 @@ export async function getProductosActivos(): Promise<Producto[]> {
   const { data, error } = await supabase
     .from("productos")
     .select(`
-      id, nombre, descripcion, precio_venta, imagen_url, codigo_interno, disponible_en_tienda,
+      id, nombre, descripcion, precio_venta, imagen_url, codigo_interno, disponible_en_tienda, precio_mostrar,
       promo_activa, promo_fecha_inicio, promo_fecha_fin, promo_descuento_monto,
       categoria:categorias(id, nombre, slug),
       marca:marcas(id, nombre, slug),
@@ -47,6 +48,7 @@ export async function getProductosActivos(): Promise<Producto[]> {
 
   type ProductoConInventario = Producto & {
     disponible_en_tienda: boolean;
+    precio_mostrar: string | null;
     inventario_local: { cantidad: number; precio_venta: number | null; local_id: string }[] | null;
   };
 
@@ -54,10 +56,11 @@ export async function getProductosActivos(): Promise<Producto[]> {
     .map((p) => {
       const inventario = p.inventario_local ?? [];
       const stockTotal = inventario.reduce((sum, i) => sum + i.cantidad, 0);
-      const precioSucursal = inventario.find((i) => i.local_id === SUCURSAL_ID)?.precio_venta;
+      const localElegido = p.precio_mostrar === "matriz" ? MATRIZ_ID : SUCURSAL_ID;
+      const precioElegido = inventario.find((i) => i.local_id === localElegido)?.precio_venta;
       return {
         ...p,
-        precio_venta: precioSucursal ?? p.precio_venta,
+        precio_venta: precioElegido ?? p.precio_venta,
         _visible: p.disponible_en_tienda && stockTotal > 0,
       };
     })
