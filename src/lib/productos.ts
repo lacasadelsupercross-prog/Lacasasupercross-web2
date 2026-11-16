@@ -32,27 +32,37 @@ export interface Servicio {
 }
 
 export async function getProductosActivos(): Promise<Producto[]> {
-  const { data, error } = await supabase
-    .from("productos")
-    .select(`
-      id, nombre, descripcion, precio_venta, imagen_url, codigo_interno, disponible_en_tienda, precio_mostrar,
-      promo_activa, promo_fecha_inicio, promo_fecha_fin, promo_descuento_monto,
-      categoria:categorias(id, nombre, slug),
-      marca:marcas(id, nombre, slug),
-      inventario_local(cantidad, precio_venta, local_id)
-    `)
-    .eq("activo", true)
-    .order("nombre");
-
-  if (error) throw new Error(error.message);
-
   type ProductoConInventario = Producto & {
     disponible_en_tienda: boolean;
     precio_mostrar: string | null;
     inventario_local: { cantidad: number; precio_venta: number | null; local_id: string }[] | null;
   };
 
-  return ((data as ProductoConInventario[]) ?? [])
+  // Paginado: Supabase recorta cada respuesta a 1000 filas sin avisar y el catálogo ya las supera
+  // (sin esto, los últimos productos del alfabeto —p. ej. los "Tubo..."— desaparecen de la tienda).
+  const PAGE = 1000;
+  const data: ProductoConInventario[] = [];
+  for (let desde = 0; ; desde += PAGE) {
+    const { data: lote, error } = await supabase
+      .from("productos")
+      .select(`
+        id, nombre, descripcion, precio_venta, imagen_url, codigo_interno, disponible_en_tienda, precio_mostrar,
+        promo_activa, promo_fecha_inicio, promo_fecha_fin, promo_descuento_monto,
+        categoria:categorias(id, nombre, slug),
+        marca:marcas(id, nombre, slug),
+        inventario_local(cantidad, precio_venta, local_id)
+      `)
+      .eq("activo", true)
+      .order("nombre")
+      .order("id")
+      .range(desde, desde + PAGE - 1);
+
+    if (error) throw new Error(error.message);
+    data.push(...((lote as unknown as ProductoConInventario[]) ?? []));
+    if (!lote || lote.length < PAGE) break;
+  }
+
+  return data
     .map((p) => {
       const inventario = p.inventario_local ?? [];
       const stockTotal = inventario.reduce((sum, i) => sum + i.cantidad, 0);
